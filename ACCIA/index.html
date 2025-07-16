@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydra - Borraccia del Futuro</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2B4C7E',    // Blu montagna
+                        secondary: '#1B365C',   // Blu scuro
+                        accent: '#D1E5F7',      // Azzurro ghiaccio
+                        dark: '#1A1F2B',        // Quasi nero
+                        light: '#F5F7FA',       // Bianco ghiaccio
+                        'mountain-gray': '#2A3441' // Grigio montagna
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <script src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js" type="module"></script>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        /* Animazioni Hero */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .hero-title {
+            animation: fadeInUp 0.8s ease-out forwards;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .hero-description {
+            animation: fadeInUp 0.8s ease-out forwards;
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+
+        .hero-buttons {
+            animation: fadeInUp 0.8s ease-out forwards;
+            animation-delay: 0.6s;
+            opacity: 0;
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .hero-bg {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg img {
+            width: 100vw;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            transition: transform 0.3s ease-out;
+        }
+
+        .hero-bg:hover img {
+            transform: translate(-50%, -50%) scale(1.02);
+        }
+
+        .hero-card {
+            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-button {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .hero-button::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+            transition: 0.5s;
+        }
+
+        .hero-button:hover::after {
+            left: 100%;
+        }
+
+        .hero-bg .container {
+            position: relative;
+            z-index: 1;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .custom-checkbox {
+            display: none;
+        }
+        .custom-checkbox-label {
+            position: relative;
+            padding-left: 30px;
+            cursor: pointer;
+        }
+        .custom-checkbox-label:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .custom-checkbox:checked + .custom-checkbox-label:before {
+            background-color: #3B82F6;
+            border-color: #3B82F6;
+        }
+        .custom-checkbox:checked + .custom-checkbox-label:after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .custom-range {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            outline: none;
+        }
+        .custom-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3B82F6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .custom-range::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3B82F6;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .color-option.selected {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #3B82F6;
+        }
+        .feature-card:hover .feature-icon {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            transition: transform 0.3s ease;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .quantity-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f3f4f6;
+            transition: background-color 0.3s ease;
+        }
+        .quantity-btn:hover {
+            background-color: #e5e7eb;
+        }
+        .quantity-input {
+            width: 50px;
+            height: 36px;
+            text-align: center;
+            border: none;
+            background-color: #f9fafb;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #3B82F6;
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Stili AR */
+        model-viewer {
+            --poster-color: transparent;
+            background-color: transparent;
+            border-radius: 0.75rem;
+        }
+
+        .ar-button {
+            background-color: #2B4C7E;
+            border-radius: 8px;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-weight: 500;
+            margin: 8px;
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .ar-button:hover {
+            background-color: #1B365C;
+            transform: translateY(-2px);
+        }
+
+        .ar-button:active {
+            background-color: #1B365C;
+            transform: translateY(1px);
+        }
+
+        .progress-bar {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 4px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 0.75rem 0.75rem;
+        }
+
+        .update-bar {
+            background-color: #2B4C7E;
+            height: 100%;
+            width: 0;
+            border-radius: 0 0 0.75rem 0.75rem;
+            transition: width 0.3s ease;
+        }
+
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-dark/80 backdrop-blur-sm z-50 border-b border-accent/10">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="w-10 h-10 flex items-center justify-center text-accent/80 hover:text-accent transition-colors">
+                <i class="ri-menu-line ri-lg"></i>
+            </div>
+            
+            <a href="#" class="h-10 flex items-center">
+                <img src="images/logo.png" alt="ACCIA Logo" class="h-full w-auto">
+            </a>
+            
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 flex items-center justify-center text-accent/80 hover:text-accent transition-colors">
+                    <i class="ri-search-line ri-lg"></i>
+                </div>
+                <div class="w-10 h-10 flex items-center justify-center relative text-accent/80 hover:text-accent transition-colors">
+                    <i class="ri-shopping-cart-line ri-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-primary text-light text-xs w-5 h-5 flex items-center justify-center rounded-full">2</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-bg pt-24 h-[calc(100vh)] flex items-center">
+        <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover">
+            <source src="videos/vertical.mp4" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-gradient-to-br from-dark/80 via-dark/50 to-transparent"></div>
+        <div class="container mx-auto px-4 w-full relative z-10">
+            <div class="flex flex-col items-center justify-center text-center max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-[64px] font-light tracking-[0.2em] text-white">ACCIA</h1>
+                </div>
+                <p class="hero-description text-2xl mb-10 text-accent max-w-2xl">La borraccia del futuro, progettata per le tue avventure in montagna.</p>
+                
+                <div class="hero-stats flex gap-12 mb-10">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-light">-20°C</div>
+                        <div class="text-sm text-accent mt-1">Isolamento Estremo</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-light">3000m</div>
+                        <div class="text-sm text-accent mt-1">Altitudine Testata</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-light">24h</div>
+                        <div class="text-sm text-accent mt-1">Durata Termica</div>
+                    </div>
+                </div>
+
+                <div class="hero-buttons flex flex-col sm:flex-row gap-4 mb-12">
+                    <a href="#personalization" class="hero-button bg-accent text-dark py-4 px-10 !rounded-button font-medium whitespace-nowrap flex items-center gap-2 group hover:bg-light">
+                        <span>Personalizza Ora</span>
+                        <i class="ri-arrow-right-line transition-transform group-hover:translate-x-1"></i>
+                    </a>
+                    <button class="hero-button bg-transparent text-light border border-light/20 py-4 px-10 !rounded-button font-medium whitespace-nowrap flex items-center gap-2 hover:bg-light/10">
+                        <span>Scopri di Più</span>
+                        <i class="ri-information-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="min-h-[100vh] bg-light relative overflow-hidden flex items-center">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,_rgba(43,76,126,0.05),transparent_70%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,_rgba(209,229,247,0.15),transparent_70%)]"></div>
+        
+        <div class="container mx-auto px-4 relative py-20">
+            <div class="text-center mb-24">
+                <span class="text-primary text-sm font-medium tracking-wider uppercase mb-4 block">Tecnologia Avanzata</span>
+                <h2 class="text-5xl font-bold mb-6 text-dark">Caratteristiche Rivoluzionarie</h2>
+                <p class="text-mountain-gray text-xl max-w-2xl mx-auto">La nostra borraccia combina tecnologia all'avanguardia con design minimalista per offrirti un'esperienza d'uso senza precedenti.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- Feature 1 -->
+                <div class="group">
+                    <div class="feature-card relative p-8 rounded-2xl bg-white border border-primary/10 shadow-lg shadow-primary/5 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10">
+                        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+                        
+                        <div class="relative">
+                            <div class="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center mb-8 mx-auto feature-icon group-hover:scale-110 transition-transform duration-500 border border-primary/10">
+                                <i class="ri-temp-cold-line ri-2x text-primary"></i>
+                            </div>
+                            
+                            <h3 class="text-2xl font-semibold mb-4 text-center text-dark group-hover:text-primary transition-colors">Isolamento Termico</h3>
+                            
+                            <div class="space-y-3 text-mountain-gray">
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>24 ore temperatura fredda</span>
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>12 ore temperatura calda</span>
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>Doppio strato isolante</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="group md:translate-y-12">
+                    <div class="feature-card relative p-8 rounded-2xl bg-white border border-primary/10 shadow-lg shadow-primary/5 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10">
+                        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+                        
+                        <div class="relative">
+                            <div class="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center mb-8 mx-auto feature-icon group-hover:scale-110 transition-transform duration-500 border border-primary/10">
+                                <i class="ri-recycle-line ri-2x text-primary"></i>
+                            </div>
+                            
+                            <h3 class="text-2xl font-semibold mb-4 text-center text-dark group-hover:text-primary transition-colors">Eco-Sostenibile</h3>
+                            
+                            <div class="space-y-3 text-mountain-gray">
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>100% materiali riciclabili</span>
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>Produzione eco-friendly</span>
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>Zero sprechi packaging</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="group">
+                    <div class="feature-card relative p-8 rounded-2xl bg-white border border-primary/10 shadow-lg shadow-primary/5 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10">
+                        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+                        
+                        <div class="relative">
+                            <div class="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center mb-8 mx-auto feature-icon group-hover:scale-110 transition-transform duration-500 border border-primary/10">
+                                <i class="ri-bluetooth-line ri-2x text-primary"></i>
+                            </div>
+                            
+                            <h3 class="text-2xl font-semibold mb-4 text-center text-dark group-hover:text-primary transition-colors">Smart Tracking</h3>
+                            
+                            <div class="space-y-3 text-mountain-gray">
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>Monitoraggio temperatura</span>
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>Tracciamento idratazione</span>
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="ri-checkbox-circle-line text-primary"></i>
+                                    <span>App dedicata iOS/Android</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specifications Section -->
+    <section class="py-20 bg-dark">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                <div class="md:w-1/2">
+                    <img src="https://readdy.ai/api/search-image?query=minimalist%20futuristic%20water%20bottle%20with%20smart%20features%2C%20clean%20white%20background%2C%20product%20photography%2C%20studio%20lighting%2C%20high-end%20product%20shot%2C%20transparent%20materials%2C%20modern%20design%2C%20sleek%20finish%2C%208k%20resolution&width=600&height=800&seq=67890&orientation=portrait" alt="Hydra X3 Borraccia" class="rounded-xl shadow-lg mx-auto max-w-full h-auto">
+                </div>
+                
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl font-bold mb-6 text-light">Specifiche Tecniche</h2>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium text-light">Capacità</span>
+                                <span class="text-light">750ml</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium text-light">Peso</span>
+                                <span class="text-light">320g</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium text-light">Durata Batteria</span>
+                                <span class="text-light">30 giorni</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium text-light">Resistenza agli Urti</span>
+                                <span class="text-light">Eccellente</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold mb-4 text-light">Materiali</h3>
+                        <ul class="space-y-2 mb-8">
+                            <li class="flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3 text-primary">
+                                    <i class="ri-check-line"></i>
+                                </div>
+                                <span class="text-light">Acciaio inossidabile di grado medico</span>
+                            </li>
+                            <li class="flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3 text-primary">
+                                    <i class="ri-check-line"></i>
+                                </div>
+                                <span class="text-light">Rivestimento interno in ceramica</span>
+                            </li>
+                            <li class="flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3 text-primary">
+                                    <i class="ri-check-line"></i>
+                                </div>
+                                <span class="text-light">Tappo in silicone alimentare</span>
+                            </li>
+                            <li class="flex items-center">
+                                <div class="w-6 h-6 flex items-center justify-center mr-3 text-primary">
+                                    <i class="ri-check-line"></i>
+                                </div>
+                                <span class="text-light">Sensori di temperatura integrati</span>
+                            </li>
+                        </ul>
+                        <a href="#personalization" class="inline-block bg-accent text-dark py-3 px-8 !rounded-button font-medium hover:bg-light transition-all">
+                            Configura la Tua ACCIA
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sustainability Section -->
+    <section class="py-20 bg-light relative overflow-hidden">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 bg-accent rounded-full text-primary font-medium mb-4">Eco-Friendly</span>
+                <h2 class="text-3xl font-bold mb-4 text-dark">Sostenibilità al Primo Posto</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Il nostro impegno per un futuro più sostenibile si riflette in ogni aspetto del nostro prodotto e della nostra azienda.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Materiali Sostenibili -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-accent rounded-xl flex items-center justify-center mb-6">
+                        <i class="ri-recycle-line text-3xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-dark">Materiali Sostenibili</h3>
+                    <p class="text-gray-600 mb-4">Utilizziamo acciaio inossidabile 100% riciclabile e materiali eco-compatibili per ridurre l'impatto ambientale.</p>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            Acciaio inossidabile di grado alimentare
+                        </li>
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            Packaging plastic-free
+                        </li>
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            Componenti riciclabili
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Produzione Responsabile -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-accent rounded-xl flex items-center justify-center mb-6">
+                        <i class="ri-plant-line text-3xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-dark">Produzione Responsabile</h3>
+                    <p class="text-gray-600 mb-4">Il nostro processo produttivo è ottimizzato per minimizzare l'impatto ambientale e massimizzare l'efficienza energetica.</p>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            Energia 100% rinnovabile
+                        </li>
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            Zero sprechi d'acqua
+                        </li>
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            Filiera corta certificata
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Impatto Ambientale -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-accent rounded-xl flex items-center justify-center mb-6">
+                        <i class="ri-earth-line text-3xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-dark">Impatto Positivo</h3>
+                    <p class="text-gray-600 mb-4">Ogni ACCIA venduta contribuisce attivamente alla riduzione della plastica monouso e al sostegno di progetti ambientali.</p>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            -500 bottiglie di plastica all'anno
+                        </li>
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            Progetti di riforestazione
+                        </li>
+                        <li class="flex items-center">
+                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                            Pulizia degli oceani
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Environmental Impact Counter -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-primary mb-2 counter" data-target="1000000">0</div>
+                        <p class="text-gray-600">Bottiglie di Plastica Evitate</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-primary mb-2 counter" data-target="50000">0</div>
+                        <p class="text-gray-600">Alberi Piantati</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-primary mb-2 counter" data-target="25000">0</div>
+                        <p class="text-gray-600">Kg di Plastica Raccolta dagli Oceani</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificazioni -->
+            <div class="mt-16 text-center">
+                <h3 class="text-xl font-bold mb-8 text-dark">Le Nostre Certificazioni</h3>
+                <div class="flex flex-wrap justify-center items-center gap-8">
+                    <div class="certification-badge p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                        <i class="ri-award-line text-4xl text-primary mb-2"></i>
+                        <p class="text-sm font-medium text-dark">ISO 14001</p>
+                    </div>
+                    <div class="certification-badge p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                        <i class="ri-leaf-line text-4xl text-primary mb-2"></i>
+                        <p class="text-sm font-medium text-dark">B Corp</p>
+                    </div>
+                    <div class="certification-badge p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                        <i class="ri-recycle-line text-4xl text-primary mb-2"></i>
+                        <p class="text-sm font-medium text-dark">Plastic Free</p>
+                    </div>
+                    <div class="certification-badge p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                        <i class="ri-shield-star-line text-4xl text-primary mb-2"></i>
+                        <p class="text-sm font-medium text-dark">Carbon Neutral</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Decoration -->
+        <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-accent opacity-10 rounded-bl-full"></div>
+        <div class="absolute bottom-0 left-0 w-1/4 h-1/4 bg-primary opacity-10 rounded-tr-full"></div>
+    </section>
+
+    <!-- AR Section -->
+    <section class="py-20 bg-light relative overflow-hidden" id="ar-section">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Esplora in Realtà Aumentata</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Visualizza la tua ACCIA nel tuo spazio reale o esplora il modello 3D interattivo.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-dark">Visualizzatore 3D</h3>
+                    <div class="aspect-square rounded-xl overflow-hidden bg-gray-100 relative">
+                        <model-viewer
+                            src="models/bottle.glb"
+                            alt="Modello 3D ACCIA"
+                            camera-controls
+                            auto-rotate
+                            ar
+                            ar-modes="webxr scene-viewer"
+                            environment-image="neutral"
+                            shadow-intensity="1"
+                            exposure="1"
+                            style="width: 100%; height: 100%;"
+                            id="bottle-viewer"
+                            loading="eager"
+                            camera-orbit="45deg 55deg 2.5m"
+                            min-camera-orbit="auto auto 1.5m"
+                            max-camera-orbit="auto auto 3.5m"
+                            interaction-prompt="none"
+                            ar-status="not-presenting">
+                            
+                            <button slot="ar-button" class="ar-button">
+                                Visualizza in AR
+                            </button>
+
+                            <div class="progress-bar hide" slot="progress-bar">
+                                <div class="update-bar"></div>
+                            </div>
+
+                            <!-- Fallback per browser non supportati -->
+                            <div class="error-container" slot="error">
+                                <div class="error-message bg-white p-6 rounded-lg shadow-md text-center">
+                                    <div class="mb-4">
+                                        <i class="ri-error-warning-line text-4xl text-primary"></i>
+                                    </div>
+                                    <h4 class="text-lg font-bold text-dark mb-2">
+                                        Visualizzatore 3D non supportato
+                                    </h4>
+                                    <p class="text-gray-600 mb-4">
+                                        Per la migliore esperienza, ti consigliamo di:
+                                    </p>
+                                    <ul class="text-left text-gray-600 space-y-2 mb-4">
+                                        <li class="flex items-center">
+                                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                                            Utilizzare Chrome o Safari aggiornati
+                                        </li>
+                                        <li class="flex items-center">
+                                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                                            Abilitare WebGL nel tuo browser
+                                        </li>
+                                        <li class="flex items-center">
+                                            <i class="ri-checkbox-circle-line text-primary mr-2"></i>
+                                            Verificare che l'accelerazione hardware sia attiva
+                                        </li>
+                                    </ul>
+                                    <button onclick="location.reload()" class="bg-primary text-white px-6 py-2 rounded-button hover:bg-blue-600 transition-all">
+                                        <i class="ri-refresh-line mr-2"></i>
+                                        Riprova
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Placeholder durante il caricamento -->
+                            <div slot="poster" class="flex items-center justify-center w-full h-full bg-gray-50">
+                                <div class="text-center p-4">
+                                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                                    <p class="text-gray-600">Caricamento modello 3D...</p>
+                                </div>
+                            </div>
+                        </model-viewer>
+
+                        <!-- Overlay per dispositivi non supportati -->
+                        <div id="ar-not-supported" class="hidden absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center p-6">
+                            <div class="text-center">
+                                <div class="mb-4">
+                                    <i class="ri-smartphone-line text-4xl text-primary"></i>
+                                </div>
+                                <h4 class="text-lg font-bold text-dark mb-2">
+                                    AR non disponibile
+                                </h4>
+                                <p class="text-gray-600">
+                                    La realtà aumentata non è supportata su questo dispositivo.
+                                    Puoi comunque esplorare il modello 3D interattivo!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <h4 class="font-medium mb-3">Controlli:</h4>
+                        <ul class="space-y-2 text-gray-600">
+                            <li class="flex items-center">
+                                <i class="ri-drag-move-fill mr-2"></i>
+                                Trascina per ruotare
+                            </li>
+                            <li class="flex items-center">
+                                <i class="ri-zoom-in-line mr-2"></i>
+                                Scorri per zoomare
+                            </li>
+                            <li class="flex items-center">
+                                <i class="ri-smartphone-line mr-2"></i>
+                                Premi AR per visualizzare nel tuo spazio
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold mb-4 flex items-center text-dark">
+                            <i class="ri-smartphone-line mr-2 text-primary"></i>
+                            Visualizza nel Tuo Spazio
+                        </h3>
+                        <p class="text-gray-600">Usa il tuo dispositivo mobile per vedere come la borraccia ACCIA si integra nel tuo ambiente reale.</p>
+                        <button id="start-ar" class="mt-4 bg-primary text-white px-6 py-3 rounded-button font-medium hover:bg-blue-600 transition-all flex items-center">
+                            <i class="ri-camera-line mr-2"></i>
+                            Avvia AR
+                        </button>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold mb-4 flex items-center text-dark">
+                            <i class="ri-information-line mr-2 text-primary"></i>
+                            Come Funziona
+                        </h3>
+                        <ol class="space-y-3 text-gray-600">
+                            <li class="flex items-start">
+                                <span class="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center mr-3 flex-shrink-0">1</span>
+                                Premi il pulsante "Avvia AR" o "Visualizza in AR"
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center mr-3 flex-shrink-0">2</span>
+                                Punta la fotocamera verso una superficie piana
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center mr-3 flex-shrink-0">3</span>
+                                Tocca lo schermo per posizionare la borraccia
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Decoration -->
+        <div class="absolute -top-10 -right-10 w-40 h-40 bg-accent rounded-full opacity-20 blur-3xl"></div>
+        <div class="absolute -bottom-20 -left-20 w-60 h-60 bg-primary rounded-full opacity-10 blur-3xl"></div>
+    </section>
+
+    <!-- Purchase Section -->
+    <section id="personalization" class="min-h-[100vh] bg-dark flex items-center">
+        <div class="container mx-auto px-4 py-20">
+            <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/2 p-8 md:p-12">
+                        <h2 class="text-3xl font-bold mb-6 text-dark">ACCIA</h2>
+                        <div class="mb-6">
+                            <h3 class="text-lg font-medium mb-3 text-dark">Scegli il colore</h3>
+                            <div class="flex gap-4">
+                                <div class="color-option selected" style="background-color: #3B82F6;" data-color="Blu Oceano"></div>
+                                <div class="color-option" style="background-color: #10B981;" data-color="Verde Foresta"></div>
+                                <div class="color-option" style="background-color: #F59E0B;" data-color="Ambra"></div>
+                                <div class="color-option" style="background-color: #EC4899;" data-color="Rosa Neon"></div>
+                                <div class="color-option" style="background-color: #111827;" data-color="Nero Spazio"></div>
+                            </div>
+                            <p class="text-sm text-mountain-gray mt-2">Colore selezionato: <span id="selected-color">Blu Oceano</span></p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-medium mb-3 text-dark">Dimensione</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <button class="size-option selected p-3 border-2 border-primary rounded-lg text-center hover:bg-accent transition-all" data-size="500" data-price="49.99">
+                                    <span class="block text-lg font-bold text-dark">500ml</span>
+                                    <span class="text-sm text-mountain-gray">Compatta</span>
+                                </button>
+                                <button class="size-option p-3 border-2 border-gray-200 rounded-lg text-center hover:bg-accent transition-all" data-size="750" data-price="59.99">
+                                    <span class="block text-lg font-bold text-dark">750ml</span>
+                                    <span class="text-sm text-mountain-gray">Standard</span>
+                                </button>
+                                <button class="size-option p-3 border-2 border-gray-200 rounded-lg text-center hover:bg-accent transition-all" data-size="1000" data-price="69.99">
+                                    <span class="block text-lg font-bold text-dark">1000ml</span>
+                                    <span class="text-sm text-mountain-gray">Grande</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-medium mb-3 text-dark">Quantità</h3>
+                            <div class="quantity-control">
+                                <button class="quantity-btn decrease-btn !rounded-button whitespace-nowrap bg-gray-100">
+                                    <i class="ri-subtract-line"></i>
+                                </button>
+                                <input type="number" value="1" min="1" class="quantity-input border-none text-dark font-bold text-lg w-16 text-center" id="quantity-input">
+                                <button class="quantity-btn increase-btn !rounded-button whitespace-nowrap bg-gray-100">
+                                    <i class="ri-add-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <h3 class="text-lg font-medium mb-3 text-dark">Opzioni</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" class="custom-checkbox" id="option-tracking" data-price="15.00">
+                                        <span class="custom-checkbox-label text-mountain-gray">Smart Tracking</span>
+                                    </label>
+                                    <span class="text-mountain-gray">+€15,00</span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" class="custom-checkbox" id="option-engraving" data-price="10.00">
+                                        <span class="custom-checkbox-label text-mountain-gray">Incisione Personalizzata</span>
+                                    </label>
+                                    <span class="text-mountain-gray">+€10,00</span>
+                                </div>
+                                
+                                <!-- Campo Incisione -->
+                                <div id="engraving-input" class="hidden mt-3 ml-8">
+                                    <input type="text" 
+                                           maxlength="20" 
+                                           placeholder="Inserisci il testo dell'incisione (max 20 caratteri)" 
+                                           class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary text-dark text-sm">
+                                    <p class="text-xs text-mountain-gray mt-1">Massimo 20 caratteri, solo lettere e numeri</p>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" class="custom-checkbox" id="option-warranty" checked data-price="8.00">
+                                        <span class="custom-checkbox-label text-mountain-gray">Garanzia Estesa (2 anni)</span>
+                                    </label>
+                                    <span class="text-mountain-gray">+€8,00</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="text-2xl font-bold text-dark" id="total-price">€49,99</span>
+                            <div class="flex items-center">
+                                <span class="text-sm text-mountain-gray mr-2">Spedizione Rapida</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-primary text-white py-4 !rounded-button font-medium hover:bg-blue-600 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                            <i class="ri-shopping-cart-line"></i>
+                            Aggiungi al Carrello
+                        </button>
+                    </div>
+                    
+                    <div class="md:w-1/2 bg-light p-8 md:p-0 flex items-center justify-center">
+                        <img src="https://readdy.ai/api/search-image?query=minimalist%20futuristic%20water%20bottle%20with%20blue%20color%2C%20clean%20white%20background%2C%20product%20photography%2C%20studio%20lighting%2C%20high-end%20product%20shot%2C%20transparent%20materials%2C%20modern%20design%2C%20sleek%20finish%2C%208k%20resolution&width=500&height=600&seq=13579&orientation=portrait" alt="Hydra X3 Borraccia" class="max-w-full h-auto">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="py-20 bg-light">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4 text-dark">Galleria ACCIA</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Scopri la bellezza e la versatilità della nostra borraccia attraverso gli scatti dei nostri clienti.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Gallery Item 1 -->
+                <div class="gallery-item group">
+                    <div class="relative overflow-hidden rounded-xl aspect-square">
+                        <img src="images/img1.png" alt="ACCIA in ufficio" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                            <div class="text-white">
+                                <h3 class="font-bold mb-2">Design Minimalista</h3>
+                                <p class="text-sm opacity-90">Perfetta per ogni ambiente di lavoro</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Item 2 -->
+                <div class="gallery-item group">
+                    <div class="relative overflow-hidden rounded-xl aspect-square">
+                        <img src="images/img2.png" alt="ACCIA durante l'allenamento" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                            <div class="text-white">
+                                <h3 class="font-bold mb-2">Compagna di Allenamento</h3>
+                                <p class="text-sm opacity-90">Ideale per le tue sessioni di fitness</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Item 3 -->
+                <div class="gallery-item group">
+                    <div class="relative overflow-hidden rounded-xl aspect-square">
+                        <img src="images/img3.png" alt="ACCIA in natura" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                            <div class="text-white">
+                                <h3 class="font-bold mb-2">Avventure all'Aperto</h3>
+                                <p class="text-sm opacity-90">Il tuo compagno di escursioni</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Item 4 -->
+                <div class="gallery-item group">
+                    <div class="relative overflow-hidden rounded-xl aspect-square">
+                        <img src="images/img4.png" alt="ACCIA dettagli" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                            <div class="text-white">
+                                <h3 class="font-bold mb-2">Dettagli Tecnici</h3>
+                                <p class="text-sm opacity-90">Tecnologia e design si incontrano</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Item Video 1 -->
+                <div class="gallery-item group md:col-span-2">
+                    <div class="relative overflow-hidden rounded-xl aspect-video">
+                        <video class="w-full h-full object-cover" autoplay loop muted playsinline>
+                            <source src="videos/orizzontal.mp4" type="video/mp4">
+                            Il tuo browser non supporta il tag video.
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                            <div class="text-white">
+                                <h3 class="font-bold mb-2">ACCIA in Azione</h3>
+                                <p class="text-sm opacity-90">Scopri tutte le funzionalità smart</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Controls -->
+            <div class="flex flex-col items-center gap-6 mt-12">
+                <div class="flex justify-center space-x-4">
+                    <button class="gallery-prev bg-white text-primary p-4 rounded-full shadow-md hover:bg-primary hover:text-white transition-all">
+                        <i class="ri-arrow-left-line"></i>
+                    </button>
+                    <button class="gallery-next bg-white text-primary p-4 rounded-full shadow-md hover:bg-primary hover:text-white transition-all">
+                        <i class="ri-arrow-right-line"></i>
+                    </button>
+                </div>
+                <a href="#personalization" class="inline-block bg-primary text-white py-3 px-8 !rounded-button font-medium hover:bg-blue-600 transition-all">
+                    Crea la Tua ACCIA
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Cosa Dicono i Nostri Clienti</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Scopri le esperienze di chi ha già scelto HYDRA X3 per la propria idratazione quotidiana.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="text-amber-400 flex">
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-6">"La borraccia HYDRA X3 ha cambiato completamente la mia routine quotidiana. L'app di tracciamento mi aiuta a rimanere idratata e la temperatura della mia acqua rimane perfetta tutto il giorno."</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                            <i class="ri-user-line ri-lg text-gray-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Francesca Bianchi</h4>
+                            <p class="text-sm text-gray-500">Atleta</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="text-amber-400 flex">
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-half-fill"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-6">"Design minimalista ma funzionalità all'avanguardia. La uso ogni giorno in ufficio e tutti me la invidiano. Il monitoraggio dell'idratazione è una funzione che non sapevo di aver bisogno!"</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                            <i class="ri-user-line ri-lg text-gray-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Marco Rossi</h4>
+                            <p class="text-sm text-gray-500">Designer</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="text-amber-400 flex">
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-6">"Finalmente una borraccia che unisce tecnologia e sostenibilità. L'isolamento termico è incredibile e l'app è intuitiva. La consiglio a tutti i miei amici e familiari!"</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                            <i class="ri-user-line ri-lg text-gray-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Giulia Verdi</h4>
+                            <p class="text-sm text-gray-500">Insegnante di Yoga</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <a href="#personalization" class="inline-block bg-accent text-dark py-3 px-8 !rounded-button font-medium hover:bg-light transition-all">
+                    Personalizza la Tua Esperienza
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="py-20 bg-light">
+        <div class="container mx-auto px-4">
+            <div class="max-w-2xl mx-auto text-center">
+                <h2 class="text-3xl font-bold mb-4">Rimani Aggiornato</h2>
+                <p class="text-gray-600 mb-8">Iscriviti alla nostra newsletter per ricevere aggiornamenti sui nuovi prodotti, offerte esclusive e consigli per uno stile di vita sostenibile.</p>
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="email" placeholder="La tua email" class="flex-1 px-4 py-3 rounded-button border border-gray-300 focus:outline-none focus:border-primary">
+                    <button class="bg-primary text-white px-6 py-3 !rounded-button font-medium hover:bg-blue-600 transition-all whitespace-nowrap">Iscriviti</button>
+                </div>
+                
+                <p class="text-sm text-gray-500 mt-4">Rispettiamo la tua privacy. Puoi annullare l'iscrizione in qualsiasi momento.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <a href="#" class="mb-6 block">
+                        <img src="images/logo.png" alt="ACCIA Logo" class="h-12 w-auto">
+                    </a>
+                    <p class="text-gray-400 mb-6">Ridefinendo l'idratazione con tecnologia all'avanguardia e design minimalista.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-all">
+                            <i class="ri-instagram-line"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-all">
+                            <i class="ri-facebook-fill"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-all">
+                            <i class="ri-twitter-x-line"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-all">
+                            <i class="ri-youtube-line"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-6">Prodotti</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">HYDRA X3</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">HYDRA Mini</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">HYDRA Sport</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Accessori</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">App HYDRA</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-6">Supporto</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Spedizioni</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Resi</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Garanzia</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Contattaci</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-6">Azienda</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Chi Siamo</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Sostenibilità</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Carriere</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm mb-4 md:mb-0">© 2025 HYDRA. Tutti i diritti riservati.</p>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 flex items-center justify-center">
+                        <i class="ri-visa-line ri-lg"></i>
+                    </div>
+                    <div class="w-8 h-8 flex items-center justify-center">
+                        <i class="ri-mastercard-line ri-lg"></i>
+                    </div>
+                    <div class="w-8 h-8 flex items-center justify-center">
+                        <i class="ri-paypal-line ri-lg"></i>
+                    </div>
+                    <div class="w-8 h-8 flex items-center justify-center">
+                        <i class="ri-apple-fill ri-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script id="colorSelection">
+        document.addEventListener('DOMContentLoaded', function() {
+            const colorOptions = document.querySelectorAll('.color-option');
+            const selectedColorText = document.getElementById('selected-color');
+            
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    colorOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Update selected color text
+                    selectedColorText.textContent = this.getAttribute('data-color');
+                });
+            });
+        });
+    </script>
+
+    <script id="quantityControl">
+        document.addEventListener('DOMContentLoaded', function() {
+            const decreaseBtn = document.querySelector('.decrease-btn');
+            const increaseBtn = document.querySelector('.increase-btn');
+            const quantityInput = document.getElementById('quantity-input');
+            
+            decreaseBtn.addEventListener('click', function() {
+                let currentValue = parseInt(quantityInput.value);
+                if (currentValue > 1) {
+                    quantityInput.value = currentValue - 1;
+                }
+            });
+            
+            increaseBtn.addEventListener('click', function() {
+                let currentValue = parseInt(quantityInput.value);
+                quantityInput.value = currentValue + 1;
+            });
+            
+            quantityInput.addEventListener('change', function() {
+                if (this.value < 1) {
+                    this.value = 1;
+                }
+            });
+        });
+    </script>
+
+    <script id="sizeSelection">
+        document.addEventListener('DOMContentLoaded', function() {
+            const sizeOptions = document.querySelectorAll('.size-option');
+            
+            sizeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class and border from all options
+                    sizeOptions.forEach(opt => {
+                        opt.classList.remove('selected');
+                        opt.classList.remove('border-primary');
+                        opt.classList.add('border-gray-200');
+                    });
+                    
+                    // Add selected class and primary border to clicked option
+                    this.classList.add('selected');
+                    this.classList.remove('border-gray-200');
+                    this.classList.add('border-primary');
+
+                    // Update price after size change
+                    updateTotalPrice();
+                });
+            });
+        });
+    </script>
+
+    <script id="priceCalculation">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all elements that affect price
+            const quantityInput = document.getElementById('quantity-input');
+            const checkboxes = document.querySelectorAll('.custom-checkbox');
+            const totalPriceElement = document.getElementById('total-price');
+
+            // Gestione campo incisione
+            const engravingCheckbox = document.getElementById('option-engraving');
+            const engravingInput = document.getElementById('engraving-input');
+
+            engravingCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    engravingInput.classList.remove('hidden');
+                } else {
+                    engravingInput.classList.add('hidden');
+                    engravingInput.querySelector('input').value = ''; // Reset del campo
+                }
+            });
+
+            // Function to format price
+            function formatPrice(price) {
+                return '€' + price.toFixed(2).replace('.', ',');
+            }
+
+            // Function to calculate total price
+            window.updateTotalPrice = function() {
+                // Get base price from selected size
+                const selectedSize = document.querySelector('.size-option.selected');
+                let basePrice = parseFloat(selectedSize.getAttribute('data-price'));
+
+                // Add prices from selected options
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        basePrice += parseFloat(checkbox.getAttribute('data-price'));
+                    }
+                });
+
+                // Multiply by quantity
+                const quantity = parseInt(quantityInput.value);
+                const totalPrice = basePrice * quantity;
+
+                // Update price display with animation
+                const currentPrice = parseFloat(totalPriceElement.textContent.replace('€', '').replace(',', '.'));
+                if (currentPrice !== totalPrice) {
+                    totalPriceElement.style.transform = 'scale(1.1)';
+                    totalPriceElement.style.color = '#2B4C7E';
+                    setTimeout(() => {
+                        totalPriceElement.textContent = formatPrice(totalPrice);
+                        totalPriceElement.style.transform = 'scale(1)';
+                        totalPriceElement.style.color = '#1A1F2B';
+                    }, 150);
+                }
+            }
+
+            // Add event listeners for price updates
+            quantityInput.addEventListener('change', updateTotalPrice);
+            quantityInput.addEventListener('input', updateTotalPrice);
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateTotalPrice);
+            });
+
+            // Add event listeners to quantity buttons
+            document.querySelector('.decrease-btn').addEventListener('click', updateTotalPrice);
+            document.querySelector('.increase-btn').addEventListener('click', updateTotalPrice);
+
+            // Initial price calculation
+            updateTotalPrice();
+        });
+    </script>
+
+    <script id="arViewer">
+        document.addEventListener('DOMContentLoaded', function() {
+            const modelViewer = document.querySelector('#bottle-viewer');
+            const startARButton = document.querySelector('#start-ar');
+            const arNotSupportedOverlay = document.querySelector('#ar-not-supported');
+            
+            // Funzione per verificare il supporto AR
+            function checkARSupport() {
+                if (!modelViewer.canActivateAR) {
+                    arNotSupportedOverlay.classList.remove('hidden');
+                    startARButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    startARButton.disabled = true;
+                    startARButton.title = 'AR non supportata su questo dispositivo';
+                }
+            }
+
+            // Gestione del pulsante AR standalone
+            startARButton.addEventListener('click', function() {
+                if (!startARButton.disabled && modelViewer.canActivateAR) {
+                    modelViewer.activateAR();
+                }
+            });
+
+            // Gestione del caricamento del modello
+            modelViewer.addEventListener('load', function() {
+                const progressBar = modelViewer.querySelector('.progress-bar');
+                const updateBar = modelViewer.querySelector('.update-bar');
+                
+                progressBar.classList.remove('hide');
+                updateBar.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressBar.classList.add('hide');
+                }, 1000);
+
+                // Verifica il supporto AR dopo il caricamento
+                checkARSupport();
+            });
+
+            // Gestione degli errori
+            modelViewer.addEventListener('error', function(error) {
+                console.error('Errore nel caricamento del modello:', error);
+                
+                // Mostra un messaggio di errore personalizzato
+                const errorContainer = modelViewer.querySelector('.error-container');
+                if (errorContainer) {
+                    errorContainer.style.display = 'flex';
+                }
+            });
+
+            // Aggiorna il modello 3D in base al colore selezionato
+            const colorOptions = document.querySelectorAll('.color-option');
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const color = this.style.backgroundColor;
+                    
+                    // Converti il colore RGB in esadecimale
+                    const rgb = color.match(/\d+/g);
+                    const hex = '#' + rgb.map(x => {
+                        const hex = parseInt(x).toString(16);
+                        return hex.length === 1 ? '0' + hex : hex;
+                    }).join('');
+                    
+                    // Applica il colore al modello
+                    if (modelViewer.model) {
+                        const material = modelViewer.model.materials[0];
+                        if (material) {
+                            material.pbrMetallicRoughness.setBaseColorFactor([
+                                parseInt(hex.substr(1,2), 16) / 255,
+                                parseInt(hex.substr(3,2), 16) / 255,
+                                parseInt(hex.substr(5,2), 16) / 255,
+                                1.0
+                            ]);
+                        }
+                    }
+                });
+            });
+
+            // Gestione del ridimensionamento della finestra
+            window.addEventListener('resize', function() {
+                if (modelViewer.model) {
+                    modelViewer.resetTurntable();
+                }
+            });
+
+            // Inizializzazione
+            checkARSupport();
+        });
+    </script>
+
+    <script id="gallery">
+        document.addEventListener('DOMContentLoaded', function() {
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            const lightbox = document.getElementById('gallery-lightbox');
+            const lightboxImage = document.getElementById('lightbox-image');
+            const lightboxClose = document.getElementById('lightbox-close');
+            const prevButton = document.querySelector('.gallery-prev');
+            const nextButton = document.querySelector('.gallery-next');
+            let currentIndex = 0;
+
+            // Funzione per aprire il lightbox
+            function openLightbox(index) {
+                const item = galleryItems[index];
+                const img = item.querySelector('img');
+                if (img) {
+                    lightboxImage.src = img.src;
+                    lightboxImage.alt = img.alt;
+                    lightbox.classList.remove('hidden');
+                    currentIndex = index;
+                }
+            }
+
+            // Funzione per chiudere il lightbox
+            function closeLightbox() {
+                lightbox.classList.add('hidden');
+                lightboxImage.src = '';
+                lightboxImage.alt = '';
+            }
+
+            // Funzione per navigare alla prossima immagine
+            function nextImage() {
+                currentIndex = (currentIndex + 1) % galleryItems.length;
+                while (!galleryItems[currentIndex].querySelector('img')) {
+                    currentIndex = (currentIndex + 1) % galleryItems.length;
+                }
+                openLightbox(currentIndex);
+            }
+
+            // Funzione per navigare all'immagine precedente
+            function prevImage() {
+                currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+                while (!galleryItems[currentIndex].querySelector('img')) {
+                    currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+                }
+                openLightbox(currentIndex);
+            }
+
+            // Event listeners per i controlli del lightbox
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            // Event listeners per la navigazione
+            prevButton.addEventListener('click', prevImage);
+            nextButton.addEventListener('click', nextImage);
+
+            // Event listeners per la navigazione con tastiera
+            document.addEventListener('keydown', function(e) {
+                if (!lightbox.classList.contains('hidden')) {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    } else if (e.key === 'ArrowRight') {
+                        nextImage();
+                    } else if (e.key === 'ArrowLeft') {
+                        prevImage();
+                    }
+                }
+            });
+
+            // Aggiunge click listeners alle immagini della gallery
+            galleryItems.forEach((item, index) => {
+                const img = item.querySelector('img');
+                if (img) {
+                    item.addEventListener('click', () => openLightbox(index));
+                }
+            });
+
+            // Gestione del touch swipe per dispositivi mobili
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            lightbox.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, false);
+
+            lightbox.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, false);
+
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                const swipeLength = touchEndX - touchStartX;
+
+                if (Math.abs(swipeLength) > swipeThreshold) {
+                    if (swipeLength > 0) {
+                        prevImage();
+                    } else {
+                        nextImage();
+                    }
+                }
+            }
+
+            // Preload delle immagini per una transizione più fluida
+            function preloadImages() {
+                galleryItems.forEach(item => {
+                    const img = item.querySelector('img');
+                    if (img) {
+                        const preloadLink = document.createElement('link');
+                        preloadLink.rel = 'preload';
+                        preloadLink.as = 'image';
+                        preloadLink.href = img.src;
+                        document.head.appendChild(preloadLink);
+                    }
+                });
+            }
+
+            // Avvia il preload delle immagini
+            preloadImages();
+        });
+    </script>
+
+    <script id="environmentalCounters">
+        document.addEventListener('DOMContentLoaded', function() {
+            const counters = document.querySelectorAll('.counter');
+            let hasAnimated = false;
+
+            function animateCounter(counter) {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const duration = 2000; // 2 secondi
+                const step = target / (duration / 16); // 60fps
+                let current = 0;
+
+                const updateCounter = () => {
+                    current += step;
+                    if (current < target) {
+                        counter.textContent = Math.floor(current).toLocaleString('it-IT');
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target.toLocaleString('it-IT');
+                    }
+                };
+
+                updateCounter();
+            }
+
+            // Funzione per verificare se un elemento è nel viewport
+            function isInViewport(element) {
+                const rect = element.getBoundingClientRect();
+                return (
+                    rect.top >= 0 &&
+                    rect.left >= 0 &&
+                    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                );
+            }
+
+            // Funzione per avviare l'animazione quando i contatori sono visibili
+            function checkCounters() {
+                if (!hasAnimated && isInViewport(document.querySelector('.counter'))) {
+                    counters.forEach(animateCounter);
+                    hasAnimated = true;
+                    window.removeEventListener('scroll', checkCounters);
+                }
+            }
+
+            // Controlla quando i contatori diventano visibili
+            window.addEventListener('scroll', checkCounters);
+            // Controlla anche al caricamento della pagina
+            checkCounters();
+        });
+    </script>
+</body>
+</html>
